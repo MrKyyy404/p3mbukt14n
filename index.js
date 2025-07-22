@@ -41,18 +41,39 @@ const command = await question(chalk.cyan.bold("\n==============================
 switch (command) {
 case "1": {
 process.stdout.write('\x1Bc')
+const baseUrl = "https://defacermirror.com/report"
 const name = await question("Masukan Nama Anda: ")
 const team = await question("Masukan Nama Team Anda: ")
 const count = await question("Masukan Jumlah Upload: ")
 for (let i = 0; i < count; i++) {
 const url = "https://puskesmaspanjatan1.kulonprogokab.go.id/admin/saran?katakunci=Hacked+By+"+name+i
-const data = qs.stringify({ nickname: name+i, teamname: team, urls: url })
+const nama = name+i
+const res = await axios.get(baseUrl)
+const cookie = res.headers["set-cookie"].map(x => x.split(';')[0]).join('; ')
+const $ = cheerio.load(res.data)
+const token = $('input[name="captcha"]').val()
+const data = qs.stringify({
+nickname: nama,
+teamname: team,
+urls: url,
+captcha: token
+})
+
+const postData = await axios.post(baseUrl, data, {
+headers: {
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'Cookie': cookie
+}
+})
+console.log(chalk.green.bold("Succes Post✅"))
+/*const data = qs.stringify({ nickname: name+i, teamname: team, urls: url })
 const html = await axios.post("https://defacermirror.com/report", data, { headers: {
 'Content-Type': 'application/x-www-form-urlencoded'
 }
 })
 const $ = cheerio.load(html.data)
-console.log(chalk.red(`[ Response ] ${$(".alert").eq(2).text()}\n`))
+console.log(chalk.red(`[ Response ] ${$(".alert").eq(2).text()}\n`))*/
+
 }
 back()
 }
